@@ -9,6 +9,7 @@ public class ShurikenBehavior : MonoBehaviour {
         if (collision.gameObject.CompareTag("Ground"))
         {
             gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+			gameObject.GetComponent<Rigidbody2D> ().isKinematic = true;
             isGrounded = true;
         }
     }
