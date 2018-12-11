@@ -115,20 +115,46 @@ public class PlayerActions : NetworkBehaviour {
             hitDuration = airAttackClip.length;
         }
 
-        swordCollider.enabled = true;
+		CmdStartAttack ();
         yield return new WaitForSeconds(hitDuration);
-        swordCollider.enabled = false;
+		CmdStopAttack();
         animator.SetBool("AirAttacking", swordCollider.enabled);
 
     }
 
-    [Command]
-    void CmdMoveCharacter()
-    {
-        if (!isServer)
-            return;
-        RpcMoveCharacter();
-    }
+	[Command]
+	void CmdStartAttack()
+	{
+		if (!isServer)
+			return;
+		RpcStartAttack();
+	}
+
+	[ClientRpc]
+	void RpcStartAttack() {
+		swordCollider.enabled = true;
+	}
+
+	[Command]
+	void CmdStopAttack()
+	{
+		if (!isServer)
+			return;
+		RpcStopAttack();
+	}
+
+	[ClientRpc]
+	void RpcStopAttack() {
+		swordCollider.enabled = false;
+	}
+
+	[Command]
+	void CmdMoveCharacter()
+	{
+		if (!isServer)
+			return;
+		RpcMoveCharacter();
+	}
 
     [ClientRpc]
     void RpcMoveCharacter() {
@@ -172,9 +198,10 @@ public class PlayerActions : NetworkBehaviour {
 
     public void Die()
     {
-        isDead = true;
-        animator.SetBool("isDead", isDead);
-        CmdPlayerDied();
+		print("Commando chegou");
+		if (isLocalPlayer && !isDead) {
+			CmdPlayerDied();
+		}
     }
 
     [Command]
@@ -188,11 +215,13 @@ public class PlayerActions : NetworkBehaviour {
     [ClientRpc]
     void RpcPlayerDied()
     {
-        if (isLocalPlayer)
+		if (isLocalPlayer && !isDead)
         {
+			isDead = true;
+			animator.SetBool("isDead", isDead);
             print("PERDEU");
         }
-        else
+		else if (!isLocalPlayer) 
         {
             print("GANHOU");
         }
