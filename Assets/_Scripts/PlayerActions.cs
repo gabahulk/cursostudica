@@ -33,12 +33,58 @@ public class PlayerActions : NetworkBehaviour {
     [SerializeField]
     AnimationClip attackClip;
 
+    GameObject whiteSpawnPoint;
+    GameObject blackSpawnPoint;
+
+    public delegate void PlayerDied(bool hasDied);
+    public static event PlayerDied OnPlayerDeath;
+
     bool isDead = false;
 
 
+    [Command]
+    private void CmdPlayerConnected()
+    {
+        if (!isServer)
+            return;
+        if (isLocalPlayer)
+        {
+            RpcPlayerConnected(true);
+        }
+        else
+        {
+            RpcPlayerConnected(false);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcPlayerConnected(bool isFirstPlayer)
+    {
+        print("dasdaadasd");
+        if (isFirstPlayer)
+        {
+            print("AAAAAAAAAAAAAAAAAAAAAAAA");
+            GetComponent<SpriteRenderer>().material.color = new Color(255, 255, 255);
+            this.gameObject.transform.position = whiteSpawnPoint.transform.position;
+        }
+        else
+        {
+            print("BBBBBBBBBBBBBBBBBB");
+            GetComponent<SpriteRenderer>().material.color = new Color(0, 0, 0);
+            this.gameObject.transform.position = blackSpawnPoint.transform.position;
+            controller.ShouldFlip();
+        }
+    }
+
     public override void OnStartLocalPlayer()
     {
-        GetComponent<SpriteRenderer>().material.color =new Color(121, 129,255);
+        CmdPlayerConnected();
+    }
+
+    private void Awake()
+    {
+        blackSpawnPoint = GameObject.FindGameObjectWithTag("BlackSpawn");
+        whiteSpawnPoint = GameObject.FindGameObjectWithTag("WhiteSpawn");
     }
 
     // Update is called once per frame
@@ -198,9 +244,9 @@ public class PlayerActions : NetworkBehaviour {
 
     public void Die()
     {
-		print("Commando chegou");
 		if (isLocalPlayer && !isDead) {
-			CmdPlayerDied();
+            isDead = true;
+            CmdPlayerDied();
 		}
     }
 
@@ -215,15 +261,14 @@ public class PlayerActions : NetworkBehaviour {
     [ClientRpc]
     void RpcPlayerDied()
     {
-		if (isLocalPlayer && !isDead)
+		if (isLocalPlayer)
         {
-			isDead = true;
 			animator.SetBool("isDead", isDead);
-            print("PERDEU");
         }
-		else if (!isLocalPlayer) 
+
+        if (OnPlayerDeath!= null)
         {
-            print("GANHOU");
+            OnPlayerDeath(isDead);
         }
     }
 }

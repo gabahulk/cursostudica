@@ -18,10 +18,6 @@ public class CharacterController2D : MonoBehaviour
 	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
 	private Vector3 velocity = Vector3.zero;
 
-    public delegate void OnFlip(Vector3 scale);
-    public static event OnFlip OnFlipEvent;
-
-
     public PlayerActions actions;
 
     private void Awake()
@@ -83,7 +79,7 @@ public class CharacterController2D : MonoBehaviour
 		}
 	}
 
-    void ShouldFlip() {
+    public void ShouldFlip() {
         // Switch the way the player is labelled as facing.
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
