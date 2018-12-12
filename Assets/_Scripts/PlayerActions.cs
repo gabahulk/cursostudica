@@ -39,41 +39,48 @@ public class PlayerActions : NetworkBehaviour {
     public delegate void PlayerDied(bool hasDied);
     public static event PlayerDied OnPlayerDeath;
 
-    bool isDead = false;
-
+	bool isDead = false;
+	bool isFirstPlayer = false;
 
     [Command]
     private void CmdPlayerConnected()
     {
         if (!isServer)
             return;
-        if (isLocalPlayer)
-        {
-            RpcPlayerConnected(true);
-        }
-        else
-        {
-            RpcPlayerConnected(false);
-        }
+
+		if (isLocalPlayer)
+		{
+			RpcPlayerConnected(true);
+		}
+		else
+		{
+			RpcPlayerConnected(false);
+		}
     }
 
     [ClientRpc]
-    private void RpcPlayerConnected(bool isFirstPlayer)
+	private void RpcPlayerConnected(bool isFirstPlayer)
     {
-        print("dasdaadasd");
         if (isFirstPlayer)
         {
-            print("AAAAAAAAAAAAAAAAAAAAAAAA");
-            GetComponent<SpriteRenderer>().material.color = new Color(255, 255, 255);
+			if (isLocalPlayer) {
+				GetComponent<SpriteRenderer>().color = new Color(0, 255, 0);	
+			} else {
+				GetComponent<SpriteRenderer>().material.color = new Color(255, 255, 255);
+			}
             this.gameObject.transform.position = whiteSpawnPoint.transform.position;
         }
         else
         {
-            print("BBBBBBBBBBBBBBBBBB");
-            GetComponent<SpriteRenderer>().material.color = new Color(0, 0, 0);
+			if (isLocalPlayer) {
+				GetComponent<SpriteRenderer>().color = new Color(0, 255, 0);	
+			} else {
+				GetComponent<SpriteRenderer>().material.color = new Color(0, 0, 0);
+			}
             this.gameObject.transform.position = blackSpawnPoint.transform.position;
             controller.ShouldFlip();
         }
+		this.isFirstPlayer = isFirstPlayer;
     }
 
     public override void OnStartLocalPlayer()
@@ -86,6 +93,27 @@ public class PlayerActions : NetworkBehaviour {
         blackSpawnPoint = GameObject.FindGameObjectWithTag("BlackSpawn");
         whiteSpawnPoint = GameObject.FindGameObjectWithTag("WhiteSpawn");
     }
+
+	void Start(){
+		if (!isFirstPlayer)
+		{
+			if (isLocalPlayer) {
+				GetComponent<SpriteRenderer>().color = new Color(0, 255, 0);	
+			} else {
+				GetComponent<SpriteRenderer>().material.color = new Color(255, 255, 255);
+			}
+			this.gameObject.transform.position = whiteSpawnPoint.transform.position;
+		}
+		else
+		{
+			if (isLocalPlayer) {
+				GetComponent<SpriteRenderer>().color = new Color(0, 255, 0);	
+			} else {
+				GetComponent<SpriteRenderer>().material.color = new Color(0, 0, 0);
+			}
+			this.gameObject.transform.position = blackSpawnPoint.transform.position;
+		}
+	}
 
     // Update is called once per frame
     void Update()
@@ -128,7 +156,7 @@ public class PlayerActions : NetworkBehaviour {
     }
 
     void LauchProjectile() {
-        if (!isLocalPlayer)
+		if (!isLocalPlayer || inventory.NumberOfShuriken <= 0)
             return;
         CmdShootShuriken();
     }
@@ -138,15 +166,23 @@ public class PlayerActions : NetworkBehaviour {
     {
         if (!isServer)
             return;
-
         var projectile = Instantiate(shurikenPrefab, shurikenLaunchPosition.transform.position, Quaternion.identity) as GameObject;
         var directionedForce = projectileForce;
         directionedForce.x = directionedForce.x * transform.localScale.x;
         projectile.GetComponent<Rigidbody2D>().velocity = directionedForce;
-        inventory.NumberOfShuriken--;
-        animator.SetBool("isCasting", false);
         NetworkServer.Spawn(projectile);
+		RpcShootShuriken ();
     }
+
+	[ClientRpc]
+	void RpcShootShuriken()
+	{
+		if (!isLocalPlayer)
+			return;
+
+		inventory.NumberOfShuriken--;
+		animator.SetBool("isCasting", false);
+	}
 
     IEnumerator Attack()
     {
