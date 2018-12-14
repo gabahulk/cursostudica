@@ -20,19 +20,15 @@ public class ShurikenBehavior : MonoBehaviour {
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Player"))
-        {
-            gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-			gameObject.GetComponent<Rigidbody2D>().isKinematic = true;
-            isStuck = true;
-            if (collision.gameObject.CompareTag("Ground"))
-            {
-                isGrounded = true;
-            }
-            else
-            {
-                transform.parent = collision.transform;
-            }
-        }
+		if (collision.gameObject.CompareTag ("Ground") || collision.gameObject.CompareTag ("Player")) {
+			gameObject.GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
+			gameObject.GetComponent<Rigidbody2D> ().isKinematic = true;
+			isStuck = true;
+			if (collision.gameObject.CompareTag ("Ground")) {
+				isGrounded = true;
+			} else {
+				transform.parent = collision.transform;
+			}
+		}
     }
 }

@@ -36,11 +36,30 @@ public class PlayerActions : NetworkBehaviour {
     GameObject whiteSpawnPoint;
     GameObject blackSpawnPoint;
 
-    public delegate void PlayerDied(bool hasDied);
+	public delegate void PlayerDied(bool hasDied, bool isWhite);
     public static event PlayerDied OnPlayerDeath;
 
+	public AudioClip jumpSound;
+	public AudioClip clashSound;
+	public AudioClip swingSound;
+	public AudioClip deathSound;
+	public AudioSource soundSrc;
+
+
 	bool isDead = false;
-	bool isFirstPlayer = false;
+	bool isFirstPlayer;
+
+	void OnEnable()
+	{
+		GameManager.OnRestartGame += Restart;
+	}
+		
+
+	void OnDisable()
+	{
+		GameManager.OnRestartGame -= Restart;
+	}
+
 
     [Command]
     private void CmdPlayerConnected()
@@ -48,19 +67,19 @@ public class PlayerActions : NetworkBehaviour {
         if (!isServer)
             return;
 
-		if (isLocalPlayer)
-		{
-			RpcPlayerConnected(true);
-		}
-		else
-		{
-			RpcPlayerConnected(false);
-		}
+		RpcPlayerConnected(isFirstPlayer);
     }
 
     [ClientRpc]
 	private void RpcPlayerConnected(bool isFirstPlayer)
     {
+		isDead = false;
+		if (isLocalPlayer)
+		{
+			animator.SetBool("isDead", isDead);
+			inventory.NumberOfShuriken = 1;
+		}
+
         if (isFirstPlayer)
         {
 			if (isLocalPlayer) {
@@ -69,6 +88,10 @@ public class PlayerActions : NetworkBehaviour {
 				GetComponent<SpriteRenderer>().material.color = new Color(255, 255, 255);
 			}
             this.gameObject.transform.position = whiteSpawnPoint.transform.position;
+
+			if (transform.localScale.x != 1) {
+				controller.ShouldFlip();
+			}
         }
         else
         {
@@ -78,13 +101,15 @@ public class PlayerActions : NetworkBehaviour {
 				GetComponent<SpriteRenderer>().material.color = new Color(0, 0, 0);
 			}
             this.gameObject.transform.position = blackSpawnPoint.transform.position;
-            controller.ShouldFlip();
+			if (transform.localScale.x != -1) {
+				controller.ShouldFlip();
+			}
         }
-		this.isFirstPlayer = isFirstPlayer;
     }
 
     public override void OnStartLocalPlayer()
     {
+		isFirstPlayer = isServer;
         CmdPlayerConnected();
     }
 
@@ -128,11 +153,17 @@ public class PlayerActions : NetworkBehaviour {
         if (Input.GetButtonDown("Jump"))
         {
             jump = true;
+			if (controller.isGrounded) {
+				soundSrc.clip = jumpSound;
+				soundSrc.Play ();
+			}
         }
 
         if (Input.GetButtonDown("Fire3") && !swordCollider.enabled)
         {
             StartCoroutine(Attack());
+			soundSrc.clip = swingSound;
+			soundSrc.Play ();
         }
 
         if (Input.GetButtonDown("Fire2") && inventory.NumberOfShuriken > 0)
@@ -200,7 +231,7 @@ public class PlayerActions : NetworkBehaviour {
 		CmdStartAttack ();
         yield return new WaitForSeconds(hitDuration);
 		CmdStopAttack();
-        animator.SetBool("AirAttacking", swordCollider.enabled);
+        animator.SetBool("AirAttacking", false);
 
     }
 
@@ -300,11 +331,32 @@ public class PlayerActions : NetworkBehaviour {
 		if (isLocalPlayer)
         {
 			animator.SetBool("isDead", isDead);
+			soundSrc.clip = deathSound;
+			soundSrc.Play ();
         }
 
         if (OnPlayerDeath!= null)
         {
-            OnPlayerDeath(isDead);
+			OnPlayerDeath(isDead, isServer);
         }
     }
+
+	void Restart(){
+		if (isLocalPlayer) 
+			CmdRespawn ();
+	}
+
+	[Command]
+	void CmdRespawn(){
+		RpcPlayerConnected (isFirstPlayer);
+	}
+
+
+	public void Knockback(){
+		GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
+		GetComponent<Rigidbody2D> ().AddForce (new Vector2 (-transform.localScale.x * 10, 0), ForceMode2D.Impulse);
+		soundSrc.clip = clashSound;
+		soundSrc.Play ();
+	}
+
 }

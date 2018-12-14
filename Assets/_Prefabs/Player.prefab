@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 114421037440582438}
   - component: {fileID: 114311012635240904}
   - component: {fileID: 114597162611253284}
+  - component: {fileID: 82271679380166346}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -308,6 +309,101 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.8627472, y: 0.90527844}
   m_EdgeRadius: 0
+--- !u!82 &82271679380166346
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1944482955800548}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!95 &95650592193599266
 Animator:
   serializedVersion: 3
@@ -339,7 +435,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 114304739480289658}
   animator: {fileID: 95650592193599266}
-  runSpeed: 40
+  runSpeed: 50
   inventory: {fileID: 114725200641248016}
   swordCollider: {fileID: 61167785026330740}
   shurikenPrefab: {fileID: 1407799212006690, guid: c7dc3e93bba322a43b607623d51adaf3,
@@ -348,6 +444,11 @@ MonoBehaviour:
   projectileForce: {x: 20, y: 1}
   airAttackClip: {fileID: 7400000, guid: 4dec205daea8d8e4b86fd447e5b3c4a8, type: 2}
   attackClip: {fileID: 7400000, guid: ce11b3bb497a94a418b945c878dd94e9, type: 2}
+  jumpSound: {fileID: 8300000, guid: 61d08a9bfc44b2746af0d0de5379cd2a, type: 3}
+  clashSound: {fileID: 8300000, guid: 785b0392eca471c41bdf47c4bf6205ff, type: 3}
+  swingSound: {fileID: 8300000, guid: 5ae4e6275263a4e469d99fd452850479, type: 3}
+  deathSound: {fileID: 8300000, guid: d5beeea99f47de3489cc7db5602dbc6d, type: 3}
+  soundSrc: {fileID: 82271679380166346}
 --- !u!114 &114304739480289658
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -359,15 +460,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec8888d4dc9bb1642b7e7ec9edc31b96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_JumpForce: 1000
-  m_MovementSmoothing: 0.073
+  m_JumpForce: 750
+  m_MovementSmoothing: 0.142
   m_AirControl: 1
   m_WhatIsGround:
     serializedVersion: 2
     m_Bits: 1
   m_GroundCheck: {fileID: 4096795980396302}
   m_CeilingCheck: {fileID: 4863539231389450}
-  m_CrouchDisableCollider: {fileID: 61677165290387006}
   isGrounded: 0
   isFalling: 0
   actions: {fileID: 114072900968413116}
